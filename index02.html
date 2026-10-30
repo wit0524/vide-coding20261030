@@ -1,0 +1,1276 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>皮克敏花園碼表 (Pikmin Stopwatch)</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Gaegu / Nunito / Fredoka / Kablammo -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Kablammo&family=Zen+Maru+Gothic:wght@500;700;900&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            pikmin: {
+              leaf: '#7AC943',
+              leafDark: '#4F9B27',
+              bud: '#FCE042',
+              flower: '#FFFFFF',
+              flowerCenter: '#FFAA00',
+              red: '#FF4A4A',
+              blue: '#2B87FF',
+              yellow: '#FFCA28',
+              soil: '#5D4037',
+              cream: '#FDFBF7',
+              moss: '#EAF5DF',
+              accent: '#FF70A6'
+            }
+          },
+          fontFamily: {
+            display: ['"Fredoka"', '"Zen Maru Gothic"', 'sans-serif'],
+            mono: ['"Fredoka"', 'monospace'],
+            kablammo: ['"Kablammo"', 'cursive']
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      font-family: 'Fredoka', 'Zen Maru Gothic', sans-serif;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      overflow-x: hidden;
+      background: radial-gradient(circle at 50% 20%, #F5FAEB 0%, #E8F5DA 45%, #D6ECC0 100%);
+    }
+
+    /* Organic sun dappled lighting overlay */
+    .sun-dappled {
+      background: 
+        radial-gradient(ellipse 400px 300px at 15% 15%, rgba(255, 255, 230, 0.45) 0%, transparent 70%),
+        radial-gradient(ellipse 500px 400px at 85% 75%, rgba(255, 240, 200, 0.35) 0%, transparent 70%),
+        radial-gradient(circle 250px at 50% 50%, rgba(255, 255, 255, 0.25) 0%, transparent 60%);
+    }
+
+    /* Clay / Organic Tactile Shadows */
+    .clay-card {
+      background: rgba(255, 255, 255, 0.88);
+      backdrop-filter: blur(12px);
+      box-shadow: 
+        0 20px 40px -15px rgba(74, 116, 42, 0.18),
+        0 0 0 1.5px rgba(255, 255, 255, 0.9) inset,
+        0 -4px 10px rgba(100, 150, 60, 0.08) inset;
+    }
+
+    .clay-btn {
+      transition: all 0.16s cubic-bezier(0.34, 1.56, 0.64, 1);
+      box-shadow: 
+        0 8px 16px -4px rgba(60, 100, 30, 0.25),
+        0 -3px 0 rgba(0, 0, 0, 0.12) inset,
+        0 2px 2px rgba(255, 255, 255, 0.6) inset;
+    }
+    .clay-btn:active {
+      transform: translateY(3px) scale(0.97);
+      box-shadow: 
+        0 2px 6px -1px rgba(60, 100, 30, 0.2),
+        0 -1px 0 rgba(0, 0, 0, 0.12) inset,
+        0 1px 1px rgba(255, 255, 255, 0.5) inset;
+    }
+
+    /* Sprout Gentle Sway Animation */
+    @keyframes plantSway {
+      0%, 100% { transform: rotate(-3deg) scale(1); }
+      50% { transform: rotate(4deg) scale(1.03); }
+    }
+    .animate-sway {
+      animation: plantSway 3.2s ease-in-out infinite;
+      transform-origin: bottom center;
+    }
+    .animate-sway-fast {
+      animation: plantSway 1.2s ease-in-out infinite;
+      transform-origin: bottom center;
+    }
+
+    /* Pikmin Animations: Excited Bouncing, Curious Tilting, Cheering */
+    @keyframes pikminBounceRunning {
+      0%, 100% { transform: translateY(0) scale(1); }
+      50% { transform: translateY(-7px) scale(1.05, 0.95); }
+    }
+
+    @keyframes pikminCheerWiggle {
+      0%, 100% { transform: rotate(0deg) scale(1); }
+      25% { transform: rotate(-8deg) translateY(-4px); }
+      75% { transform: rotate(8deg) translateY(-4px); }
+    }
+
+    @keyframes headTiltCurious {
+      0%, 100% { transform: rotate(0deg); }
+      50% { transform: rotate(12deg); }
+    }
+
+    @keyframes popReaction {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.25) translateY(-8px); }
+      100% { transform: scale(1); }
+    }
+
+    /* Pikmin state utility classes */
+    .pikmin-running-bounce {
+      animation: pikminBounceRunning 0.48s cubic-bezier(0.28, 0.84, 0.42, 1) infinite !important;
+    }
+    .pikmin-running-cheer {
+      animation: pikminCheerWiggle 0.55s ease-in-out infinite !important;
+    }
+    .pikmin-paused-tilt {
+      animation: headTiltCurious 2.2s ease-in-out infinite !important;
+    }
+    .pikmin-pop {
+      animation: popReaction 0.35s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+    }
+
+    /* Speech/Emote bubble popup */
+    .emote-bubble {
+      position: absolute;
+      top: -24px;
+      left: 50%;
+      transform: translateX(-50%) scale(0);
+      background: white;
+      border: 1.5px solid #84cc16;
+      border-radius: 9999px;
+      padding: 2px 7px;
+      font-size: 11px;
+      font-weight: bold;
+      color: #3f6212;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      pointer-events: none;
+      transition: all 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+      opacity: 0;
+      z-index: 30;
+      white-space: nowrap;
+    }
+    .emote-bubble.show {
+      transform: translateX(-50%) scale(1);
+      opacity: 1;
+    }
+
+    /* Floating Pollen / Leaves Canvas */
+    #ambientCanvas {
+      pointer-events: none;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+    }
+
+    /* Circular SVG glow */
+    .glow-ring {
+      filter: drop-shadow(0 0 8px rgba(122, 201, 67, 0.5));
+    }
+
+    /* Polaroids & High-Clarity Picture Frame Styles */
+    .polaroid-card {
+      background: #FFFFFF;
+      box-shadow: 0 10px 25px -5px rgba(0,0,0,0.15), 0 0 0 1px rgba(0,0,0,0.05);
+      image-rendering: -webkit-optimize-contrast;
+      image-rendering: crisp-edges;
+    }
+  </style>
+</head>
+<body class="min-h-screen text-slate-700 flex flex-col items-center justify-between p-4 sm:p-6 relative select-none">
+  
+  <!-- Canvas for floating nature motes (pollen, tiny leaves, sunbeams) -->
+  <canvas id="ambientCanvas"></canvas>
+
+  <div class="sun-dappled absolute inset-0 pointer-events-none"></div>
+
+  <!-- Header Section -->
+  <header class="relative z-10 w-full max-w-md text-center pt-2 pb-1 flex items-center justify-between">
+    <div class="flex items-center gap-2">
+      <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-pikmin-leaf to-pikmin-leafDark flex items-center justify-center shadow-md shadow-emerald-700/20">
+        <!-- Leaf Sprout Icon -->
+        <svg class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M17.8 2.8C16.1 2.3 12.9 3.5 11 6.5C9.2 9.4 9.5 13 9.5 13C9.5 13 6 12 4.2 14.5C2.4 17 3.5 20.2 3.5 20.2C3.5 20.2 6.8 20.8 9.5 18C11.5 16 11.5 14.2 11.5 14.2C11.5 14.2 14 17 17.5 17C21 17 21.8 13.5 21.8 13.5C21.8 13.5 20.2 3.4 17.8 2.8Z"/>
+        </svg>
+      </div>
+      <div class="text-left">
+        <h1 class="text-xl sm:text-2xl font-black text-emerald-900 tracking-wide flex items-center gap-1.5">
+          皮克敏碼表
+          <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-200/60 text-emerald-800 font-semibold tracking-normal">生長中</span>
+        </h1>
+        <p class="text-xs text-emerald-700/80 font-medium">PIKMIN NATURE STOPWATCH</p>
+      </div>
+    </div>
+
+    <!-- Pikmin Flower Stage Indicator Badge -->
+    <div id="flowerStageBadge" class="flex items-center gap-1.5 bg-white/70 backdrop-blur-md px-3 py-1.5 rounded-full border border-emerald-200/50 shadow-sm text-xs font-semibold text-emerald-800">
+      <span id="stageIcon" class="text-base">🌱</span>
+      <span id="stageName">嫩葉期</span>
+    </div>
+  </header>
+
+  <!-- Main Dial Card Container -->
+  <main class="relative z-10 w-full max-w-md my-auto flex flex-col items-center">
+    
+    <div class="clay-card w-full rounded-3xl p-6 sm:p-7 flex flex-col items-center border border-white/60 relative overflow-hidden">
+      
+      <!-- Top Sprout Character illustration (Interactive - Enlarged Mascot) -->
+      <div id="sproutContainer" class="relative -top-1 mb-1 flex flex-col items-center cursor-pointer transition-transform duration-300 animate-sway hover:scale-105 active:scale-95 group">
+        <!-- Floating click tooltip badge -->
+        <span class="absolute -top-3 px-2.5 py-0.5 rounded-full bg-emerald-600/90 text-white text-[10px] font-bold shadow-md opacity-80 group-hover:opacity-100 transition-opacity flex items-center gap-1 z-30">
+          <span>✨</span> 點我換皮克敏花色
+        </span>
+        <div id="sproutGraphic" class="w-28 h-28 sm:w-32 sm:h-32 relative flex items-center justify-center filter drop-shadow-lg">
+          <!-- SVG Pikmin Sprout / Flower that evolves as time passes (Enlarged) -->
+          <svg id="sproutSvg" viewBox="0 0 100 110" class="w-full h-full overflow-visible">
+            <!-- Stem with natural curve -->
+            <path d="M50,96 Q46,65 50,38" stroke="#3F8319" stroke-width="6.5" stroke-linecap="round" fill="none"/>
+            <path d="M50,96 Q46,65 50,38" stroke="#84CC16" stroke-width="2.5" stroke-linecap="round" fill="none" opacity="0.6"/>
+
+            <!-- Leaves / Flower Head (dynamic replacement via JS) -->
+            <g id="flowerHead">
+              <!-- Default: Fresh Green Leaf (Enlarged & Detailed) -->
+              <path d="M50,38 C30,26 24,2 50,2 C76,2 70,26 50,38 Z" fill="#7AC943" stroke="#3B7718" stroke-width="2.5"/>
+              <!-- Leaf vein -->
+              <path d="M50,36 Q50,18 50,6" stroke="#A3E635" stroke-width="2" stroke-linecap="round" fill="none"/>
+              <path d="M50,24 Q42,18 38,15" stroke="#A3E635" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+              <path d="M50,20 Q58,16 62,13" stroke="#A3E635" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+              <circle cx="50" cy="8" r="3.5" fill="#D9F99D" />
+            </g>
+
+            <!-- Cute Enlarged Pikmin Face Bulb -->
+            <circle cx="50" cy="88" r="18" fill="#EF4444" id="pikminHeadBulb" stroke="#B91C1C" stroke-width="1.5"/>
+            <!-- Cute Highlight on bulb -->
+            <ellipse cx="43" cy="78" rx="6" ry="3.5" fill="#FFFFFF" opacity="0.35" transform="rotate(-20, 43, 78)"/>
+
+            <!-- Big Cute Eyes -->
+            <ellipse cx="43" cy="85" rx="4.5" ry="5.5" fill="#FFFFFF" stroke="#991B1B" stroke-width="0.8"/>
+            <circle cx="44.2" cy="85.5" r="2.8" fill="#0F172A"/>
+            <circle cx="45.5" cy="83.8" r="1.3" fill="#FFFFFF"/>
+
+            <ellipse cx="57" cy="85" rx="4.5" ry="5.5" fill="#FFFFFF" stroke="#991B1B" stroke-width="0.8"/>
+            <circle cx="58.2" cy="85.5" r="2.8" fill="#0F172A"/>
+            <circle cx="59.5" cy="83.8" r="1.3" fill="#FFFFFF"/>
+
+            <!-- Rosy Cheeks -->
+            <ellipse cx="37" cy="92" rx="3.5" ry="2" fill="#FFA3A8" opacity="0.85"/>
+            <ellipse cx="63" cy="92" rx="3.5" ry="2" fill="#FFA3A8" opacity="0.85"/>
+
+            <!-- Sweet Smiling Mouth -->
+            <path d="M46,92 Q50,96 54,92" stroke="#7F1D1D" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+          </svg>
+        </div>
+        <span id="growthProgressTip" class="text-xs font-bold text-emerald-800/80 mt-0.5 tracking-wide bg-emerald-100/70 px-3 py-0.5 rounded-full shadow-inner">
+          🌱 核心花苗領隊 • 隨時長大中
+        </span>
+      </div>
+
+      <!-- High-Clarity Image Control Bar -->
+      <div class="w-full bg-emerald-100/60 border border-emerald-300/70 rounded-2xl p-2.5 mb-2 flex flex-col gap-2 shadow-sm">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-1.5 text-xs font-bold text-emerald-900">
+            <span class="text-sm">📷</span>
+            <span>自訂圖片清晰度控制</span>
+          </div>
+          <!-- Upload button -->
+          <label class="cursor-pointer bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-3 py-1.5 rounded-xl shadow-md transition flex items-center gap-1 active:scale-95">
+            <span>📂</span>
+            <span>選擇電腦清晰原圖</span>
+            <input type="file" id="customImageInput" accept="image/*" class="hidden">
+          </label>
+        </div>
+
+        <!-- Mode & Clarity Selector -->
+        <div class="grid grid-cols-3 gap-1.5 text-[11px] font-bold">
+          <button id="btnModePolaroid" class="py-1 px-2 rounded-lg border border-emerald-300 bg-white text-emerald-800 shadow-sm transition hover:bg-emerald-50">
+            📸 拍立得高畫質卡片
+          </button>
+          <button id="btnModeDial" class="py-1 px-2 rounded-lg border border-emerald-300 bg-emerald-700 text-white shadow-sm transition hover:bg-emerald-800">
+            🎯 錶盤原圖 (100%銳利)
+          </button>
+          <button id="btnModeBg" class="py-1 px-2 rounded-lg border border-emerald-300 bg-white text-emerald-800 shadow-sm transition hover:bg-emerald-50">
+            🌿 滿版清晰底圖
+          </button>
+        </div>
+
+        <div class="flex items-center justify-between text-[11px] text-emerald-800/90 font-medium px-1">
+          <span id="clarityStatusHint">✨ 目前設定：100% 無模糊濾鏡的原圖</span>
+          <button id="btnToggleTrans" class="underline hover:text-emerald-950 font-bold">
+            切換半透/純淨原色
+          </button>
+        </div>
+      </div>
+
+      <!-- Option 1: Standalone High-Clarity Polaroid Photo Card (Mode A) -->
+      <div id="polaroidContainer" class="hidden w-full mb-3 p-2.5 polaroid-card rounded-2xl border-2 border-emerald-200/80 flex items-center gap-3 animate-fade-in shadow-md">
+        <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-xl overflow-hidden flex-shrink-0 border border-slate-200 bg-slate-100 shadow-inner flex items-center justify-center">
+          <img id="polaroidImg" 
+               src="https://i.postimg.cc/2VHtdX43/image.png" 
+               alt="皮克敏紀念照片" 
+               class="w-full h-full object-cover">
+        </div>
+        <div class="flex-1 text-left flex flex-col justify-between py-1">
+          <div>
+            <span class="inline-block px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold text-[10px]">高清獨立卡片</span>
+            <p class="text-xs sm:text-sm font-black text-emerald-950 mt-1 line-clamp-1">皮克敏與你同在的紀念寫真</p>
+            <p class="text-[11px] text-emerald-700 mt-0.5">以 100% 原圖無失真比例銳利呈現</p>
+          </div>
+          <span class="text-[10px] text-emerald-500 font-mono">PIKMIN SPECIAL MEMORY</span>
+        </div>
+      </div>
+
+      <!-- CIRCULAR TIME DISPLAY WITH ATTENTIVE PIKMIN SQUAD -->
+      <div class="relative w-72 h-72 sm:w-80 sm:h-80 my-2 flex items-center justify-center">
+        
+        <!-- ================= PIKMIN 1: RED PIKMIN (Left, Pointy Nose, Leaning in Intensely) ================= -->
+        <div id="redPikmin" class="pikmin-character absolute -left-6 sm:-left-8 top-12 z-20 cursor-pointer group flex flex-col items-center origin-bottom transition-all duration-300">
+          <div class="emote-bubble" id="redEmote">加油！👀</div>
+          <svg class="w-16 h-24 sm:w-20 sm:h-28 drop-shadow-md" viewBox="0 0 100 140">
+            <!-- Antenna Stem & Flower -->
+            <path d="M50,45 Q42,20 46,6" stroke="#4F9B27" stroke-width="4.5" fill="none" stroke-linecap="round"/>
+            <circle cx="46" cy="6" r="6" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1.5"/>
+            <circle cx="46" cy="6" r="2.8" fill="#FBBF24"/>
+            <!-- Red Body -->
+            <path d="M50,75 C36,75 32,95 38,122 C42,126 58,126 62,122 C68,95 64,75 50,75 Z" fill="#EF4444"/>
+            <!-- Cute little red feet -->
+            <ellipse cx="40" cy="125" rx="5" ry="3" fill="#DC2626"/>
+            <ellipse cx="60" cy="125" rx="5" ry="3" fill="#DC2626"/>
+            <!-- Hands pressed excitedly against the dial -->
+            <path d="M36,92 Q22,86 16,92" stroke="#DC2626" stroke-width="4.5" stroke-linecap="round" fill="none"/>
+            <path d="M64,90 Q78,82 86,84" stroke="#DC2626" stroke-width="4.5" stroke-linecap="round" fill="none"/>
+            <circle cx="86" cy="84" r="3.5" fill="#EF4444"/>
+            <!-- Red Head -->
+            <ellipse cx="50" cy="64" rx="20" ry="22" fill="#EF4444"/>
+            <!-- Pointy Nose (Distinctive Red Pikmin signature) -->
+            <polygon points="58,64 78,61 58,68" fill="#DC2626"/>
+            <!-- Huge sparkling eyes staring intensely right towards the clock dial -->
+            <ellipse cx="40" cy="58" rx="6.5" ry="8" fill="#FFFFFF" stroke="#B91C1C" stroke-width="1"/>
+            <circle class="pupil-red" cx="42.5" cy="58.5" r="3.8" fill="#0F172A"/>
+            <circle cx="44" cy="56.5" r="1.5" fill="#FFFFFF"/>
+            
+            <ellipse cx="54" cy="57" rx="6.5" ry="8" fill="#FFFFFF" stroke="#B91C1C" stroke-width="1"/>
+            <circle class="pupil-red" cx="56.5" cy="57.5" r="3.8" fill="#0F172A"/>
+            <circle cx="58" cy="55.5" r="1.5" fill="#FFFFFF"/>
+            <!-- Blushing cheek -->
+            <ellipse cx="38" cy="68" rx="4" ry="2.2" fill="#FCA5A5" opacity="0.8"/>
+            <ellipse cx="58" cy="67" rx="4" ry="2.2" fill="#FCA5A5" opacity="0.8"/>
+            <!-- Concentrated mouth -->
+            <path d="M47,72 Q52,74 56,72" stroke="#991B1B" stroke-width="2" stroke-linecap="round" fill="none"/>
+          </svg>
+        </div>
+
+        <!-- ================= PIKMIN 2: YELLOW PIKMIN (Right, Big Ears, Cheering enthusiastically) ================= -->
+        <div id="yellowPikmin" class="pikmin-character absolute -right-6 sm:-right-8 top-10 z-20 cursor-pointer group flex flex-col items-center origin-bottom transition-all duration-300">
+          <div class="emote-bubble" id="yellowEmote">滴答！✨</div>
+          <svg class="w-16 h-24 sm:w-20 sm:h-28 drop-shadow-md" viewBox="0 0 100 140">
+            <!-- Antenna with glowing Leaf -->
+            <path d="M50,45 Q56,22 52,8" stroke="#4F9B27" stroke-width="4.5" fill="none" stroke-linecap="round"/>
+            <ellipse cx="52" cy="7" rx="9" ry="5" fill="#84CC16" stroke="#4F9B27" stroke-width="1.5" transform="rotate(-15, 52, 7)"/>
+            <!-- Big Yellow Ears (Yellow Pikmin signature) -->
+            <polygon points="26,58 6,50 24,70" fill="#FACC15" stroke="#EAB308" stroke-width="1"/>
+            <polygon points="74,58 94,50 76,70" fill="#FACC15" stroke="#EAB308" stroke-width="1"/>
+            <!-- Yellow Body -->
+            <path d="M50,78 C36,78 33,96 38,122 C42,126 58,126 62,122 C67,96 64,78 50,78 Z" fill="#FACC15"/>
+            <ellipse cx="40" cy="125" rx="5" ry="3" fill="#EAB308"/>
+            <ellipse cx="60" cy="125" rx="5" ry="3" fill="#EAB308"/>
+            <!-- Cheering Raised Arms -->
+            <path d="M35,88 Q18,74 20,62" stroke="#EAB308" stroke-width="4.5" stroke-linecap="round" fill="none"/>
+            <circle cx="20" cy="62" r="3.2" fill="#FACC15"/>
+            <path d="M65,88 Q82,74 80,62" stroke="#EAB308" stroke-width="4.5" stroke-linecap="round" fill="none"/>
+            <circle cx="80" cy="62" r="3.2" fill="#FACC15"/>
+            <!-- Yellow Head -->
+            <ellipse cx="50" cy="63" rx="22" ry="21" fill="#FACC15"/>
+            <!-- Huge Excited Eyes looking left at the clock center -->
+            <ellipse cx="42" cy="57" rx="6.5" ry="8" fill="#FFFFFF" stroke="#CA8A04" stroke-width="1"/>
+            <circle class="pupil-yellow" cx="39.5" cy="58" r="3.8" fill="#0F172A"/>
+            <circle cx="41" cy="56" r="1.5" fill="#FFFFFF"/>
+
+            <ellipse cx="57" cy="57" rx="6.5" ry="8" fill="#FFFFFF" stroke="#CA8A04" stroke-width="1"/>
+            <circle class="pupil-yellow" cx="54.5" cy="58" r="3.8" fill="#0F172A"/>
+            <circle cx="56" cy="56" r="1.5" fill="#FFFFFF"/>
+            <!-- Cheeks -->
+            <circle cx="34" cy="66" r="3" fill="#FB923C" opacity="0.6"/>
+            <circle cx="66" cy="66" r="3" fill="#FB923C" opacity="0.6"/>
+            <!-- Open Happy Smile :D -->
+            <path d="M44,69 Q50,78 56,69 Z" fill="#713F12"/>
+            <path d="M47,73 Q50,77 53,73" fill="#F87171"/>
+          </svg>
+        </div>
+
+        <!-- ================= PIKMIN 3: BLUE PIKMIN (Bottom-Left, Gills/Mouth, Peeking up at Seconds) ================= -->
+        <div id="bluePikmin" class="pikmin-character absolute left-4 -bottom-6 z-20 cursor-pointer group flex flex-col items-center origin-bottom transition-all duration-300">
+          <div class="emote-bubble" id="blueEmote">哇！好快~🌊</div>
+          <svg class="w-16 h-20 sm:w-18 sm:h-24 drop-shadow-md" viewBox="0 0 100 120">
+            <!-- Stem with Bud -->
+            <path d="M50,45 Q44,22 47,12" stroke="#4F9B27" stroke-width="4.5" fill="none" stroke-linecap="round"/>
+            <ellipse cx="47" cy="10" rx="6" ry="7" fill="#FDE047" stroke="#CA8A04" stroke-width="1.5"/>
+            <!-- Blue Head tilted up -->
+            <ellipse cx="50" cy="55" rx="20" ry="19" fill="#38BDF8"/>
+            <!-- Wide Curious Eyes looking upwards into the gauge -->
+            <ellipse cx="41" cy="48" rx="6.5" ry="7.5" fill="#FFFFFF" stroke="#0284C7" stroke-width="1"/>
+            <circle class="pupil-blue" cx="42" cy="45" r="3.6" fill="#0F172A"/>
+            <circle cx="43" cy="44" r="1.5" fill="#FFFFFF"/>
+
+            <ellipse cx="58" cy="48" rx="6.5" ry="7.5" fill="#FFFFFF" stroke="#0284C7" stroke-width="1"/>
+            <circle class="pupil-blue" cx="59" cy="45" r="3.6" fill="#0F172A"/>
+            <circle cx="60" cy="44" r="1.5" fill="#FFFFFF"/>
+            <!-- Mouth/Gills (Blue Pikmin signature) -->
+            <ellipse cx="50" cy="62" rx="6" ry="4" fill="#0284C7"/>
+            <ellipse cx="50" cy="62" rx="4" ry="2.2" fill="#E0F2FE"/>
+            <!-- Hands resting on dial lower ledge -->
+            <ellipse cx="38" cy="74" rx="4.5" ry="3.5" fill="#38BDF8"/>
+            <ellipse cx="62" cy="74" rx="4.5" ry="3.5" fill="#38BDF8"/>
+          </svg>
+        </div>
+
+        <!-- ================= PIKMIN 4: CHUBBY PURPLE PIKMIN (Bottom-Right, Tiny whiskers, Solid Focus) ================= -->
+        <div id="purplePikmin" class="pikmin-character absolute right-4 -bottom-6 z-20 cursor-pointer group flex flex-col items-center origin-bottom transition-all duration-300">
+          <div class="emote-bubble" id="purpleEmote">穩住！💪</div>
+          <svg class="w-18 h-20 sm:w-20 sm:h-24 drop-shadow-md" viewBox="0 0 100 120">
+            <!-- Antenna with pinkish bud & hair whiskers -->
+            <path d="M55,42 Q58,20 54,10" stroke="#4F9B27" stroke-width="5" fill="none" stroke-linecap="round"/>
+            <circle cx="54" cy="9" r="6" fill="#F472B6" stroke="#DB2777" stroke-width="1.5"/>
+            <!-- Head hairs / whiskers -->
+            <path d="M42,42 Q30,34 26,38" stroke="#7E22CE" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+            <path d="M68,42 Q80,34 84,38" stroke="#7E22CE" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+            <!-- Chubby Purple Round Body/Head -->
+            <ellipse cx="55" cy="60" rx="26" ry="24" fill="#A855F7"/>
+            <!-- Determined Eyes staring intently upward -->
+            <ellipse cx="44" cy="53" rx="6" ry="7" fill="#FFFFFF" stroke="#6B21A8" stroke-width="1"/>
+            <circle class="pupil-purple" cx="45" cy="50" r="3.2" fill="#0F172A"/>
+            <circle cx="46" cy="49" r="1.2" fill="#FFFFFF"/>
+
+            <ellipse cx="64" cy="53" rx="6" ry="7" fill="#FFFFFF" stroke="#6B21A8" stroke-width="1"/>
+            <circle class="pupil-purple" cx="63" cy="50" r="3.2" fill="#0F172A"/>
+            <circle cx="64" cy="49" r="1.2" fill="#FFFFFF"/>
+            <!-- Chubby Cheeks -->
+            <ellipse cx="36" cy="63" rx="4" ry="2.5" fill="#E879F9" opacity="0.6"/>
+            <ellipse cx="74" cy="63" rx="4" ry="2.5" fill="#E879F9" opacity="0.6"/>
+            <!-- Determined focused mouth -->
+            <circle cx="54" cy="64" r="2.2" fill="#581C87"/>
+            <!-- Strong little paws holding edge -->
+            <ellipse cx="40" cy="80" rx="6" ry="4" fill="#9333EA"/>
+            <ellipse cx="68" cy="80" rx="6" ry="4" fill="#9333EA"/>
+          </svg>
+        </div>
+
+        <!-- SVG Dual Track Circular Gauges -->
+        <svg class="w-full h-full transform -rotate-90" viewBox="0 0 240 240">
+          <defs>
+            <!-- Leaf green gradient for seconds ring -->
+            <linearGradient id="leafGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#8CE04C" />
+              <stop offset="50%" stop-color="#65B833" />
+              <stop offset="100%" stop-color="#4B9424" />
+            </linearGradient>
+
+            <!-- Pollen yellow gradient for milliseconds track -->
+            <linearGradient id="pollenGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#FFE066" />
+              <stop offset="100%" stop-color="#FF9F1C" />
+            </linearGradient>
+
+            <!-- Inner minute soft blue/teal ring -->
+            <linearGradient id="berryGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#4EA8DE" />
+              <stop offset="100%" stop-color="#56CFE1" />
+            </linearGradient>
+
+            <!-- Soft glow filter -->
+            <filter id="softGlow" x="-20%" y="-20%" width="140%" height="140%">
+              <feGaussianBlur stdDeviation="3" result="blur" />
+              <feComposite in="SourceGraphic" in2="blur" operator="over" />
+            </filter>
+          </defs>
+
+          <!-- Outer Milliseconds Track Background -->
+          <circle cx="120" cy="120" r="106" stroke="rgba(215, 235, 195, 0.45)" stroke-width="4" fill="none" stroke-dasharray="2 6"/>
+          
+          <!-- Outer Milliseconds Progress Circle (0 - 1000ms) -->
+          <circle id="msCircle" cx="120" cy="120" r="106" 
+                  stroke="url(#pollenGrad)" 
+                  stroke-width="4.5" 
+                  stroke-linecap="round" 
+                  fill="none" 
+                  stroke-dasharray="666" 
+                  stroke-dashoffset="666"
+                  class="transition-all duration-75"/>
+
+          <!-- Middle Main Seconds Track Background (with 60 small tick nodes) -->
+          <circle cx="120" cy="120" r="92" stroke="rgba(180, 220, 150, 0.4)" stroke-width="12" fill="none"/>
+          
+          <!-- Middle Seconds Progress Circle (0 - 60s) -->
+          <circle id="secondsCircle" cx="120" cy="120" r="92" 
+                  stroke="url(#leafGrad)" 
+                  stroke-width="12" 
+                  stroke-linecap="round" 
+                  fill="none" 
+                  stroke-dasharray="578" 
+                  stroke-dashoffset="578"
+                  filter="url(#softGlow)"
+                  class="transition-all duration-100 ease-out"/>
+
+          <!-- Inner Minutes Track (0 - 60m) -->
+          <circle cx="120" cy="120" r="76" stroke="rgba(195, 230, 240, 0.35)" stroke-width="4" fill="none" stroke-dasharray="3 4"/>
+          <circle id="minutesCircle" cx="120" cy="120" r="76" 
+                  stroke="url(#berryGrad)" 
+                  stroke-width="4" 
+                  stroke-linecap="round" 
+                  fill="none" 
+                  stroke-dasharray="477.5" 
+                  stroke-dashoffset="477.5"/>
+        </svg>
+
+        <!-- Center Rotating Petal / Leaf Dial Pointer -->
+        <div id="pointerOrbit" class="absolute inset-0 pointer-events-none flex items-center justify-center transition-transform duration-75">
+          <div class="w-full h-full relative">
+            <div id="pointerSprout" class="absolute top-1.5 left-1/2 -translate-x-1/2 w-5 h-5 bg-pikmin-bud border-2 border-white rounded-full shadow-md flex items-center justify-center text-[10px] transform rotate-90">
+              🍃
+            </div>
+          </div>
+        </div>
+
+        <!-- Custom User Image inside Dial Center (Crystal Clear without Blurring Filter) -->
+        <div id="dialImageWrapper" class="absolute w-44 h-44 sm:w-48 sm:h-48 rounded-full overflow-hidden flex items-center justify-center transition-all duration-300 pointer-events-none border-2 border-emerald-400/80 shadow-md">
+          <img id="customUserImg" 
+               src="https://i.postimg.cc/2VHtdX43/image.png" 
+               alt="皮克敏紀念圖章" 
+               class="w-full h-full object-cover transition-opacity duration-300"
+               style="image-rendering: -webkit-optimize-contrast; image-rendering: crisp-edges;">
+          <!-- Sharp readable contrast shield (No blur filter to prevent muddiness) -->
+          <div id="dialImgMask" class="absolute inset-0 bg-white/35 transition-colors duration-200"></div>
+        </div>
+
+        <!-- Center Digital Time Readout -->
+        <div class="absolute flex flex-col items-center justify-center text-center px-4 z-10 pointer-events-none">
+          <span class="text-[10px] tracking-wider uppercase font-bold text-emerald-900 bg-white/95 px-3 py-0.5 rounded-full mb-1 shadow-md border border-emerald-200">
+            ELAPSED TIME
+          </span>
+          
+          <!-- High visibility Digital Clock with High Contrast Background Plate -->
+          <div class="bg-white/90 px-3.5 py-1 rounded-2xl border-2 border-emerald-200 shadow-lg flex items-baseline justify-center font-mono font-black text-4xl sm:text-5xl text-emerald-950 tracking-tight">
+            <span id="displayMinutes">00</span>
+            <span class="text-pikmin-leafDark text-3xl sm:text-4xl animate-pulse mx-0.5">:</span>
+            <span id="displaySeconds">00</span>
+          </div>
+
+          <!-- Milliseconds fraction pill: .MS -->
+          <div class="mt-1.5 flex items-center gap-1 font-mono font-bold text-lg text-emerald-900 bg-white px-3 py-0.5 rounded-full shadow-md border border-emerald-200">
+            <span class="text-xs text-emerald-600 font-bold">.</span>
+            <span id="displayMillis" class="w-8 text-center text-pikmin-soil">00</span>
+          </div>
+
+          <!-- Total Hours Indicator if >= 1 hour -->
+          <span id="hourTag" class="hidden text-xs font-semibold text-amber-700 mt-1">00 小時</span>
+        </div>
+      </div>
+
+      <!-- Action Button Controls: START / PAUSE + RESET + LAP -->
+      <div class="w-full grid grid-cols-3 gap-2.5 sm:gap-3 mt-4 pt-2">
+        
+        <!-- Lap / 計次 按鈕 -->
+        <button id="lapBtn" disabled class="clay-btn bg-amber-50 hover:bg-amber-100/90 text-amber-800 border border-amber-200/70 rounded-2xl py-3 px-2 flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-1.5 font-bold text-sm disabled:opacity-40 disabled:cursor-not-allowed">
+          <span class="text-base">📝</span>
+          <span class="font-['Kablammo'] text-base tracking-wider">LAP</span>
+        </button>
+
+        <!-- 開始 / 暫停 按鈕 (Primary) -->
+        <button id="startPauseBtn" class="clay-btn bg-gradient-to-b from-[#8DE347] to-[#59A82D] hover:from-[#96EB4F] hover:to-[#60B531] text-white border-2 border-emerald-300 rounded-2xl py-3 px-2 flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-1.5 font-black text-base shadow-lg shadow-emerald-600/30">
+          <span id="startPauseIcon" class="flex items-center justify-center">
+            <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24">
+              <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
+            </svg>
+          </span>
+          <span id="startPauseText" class="font-['Kablammo'] text-base tracking-wider">START</span>
+        </button>
+
+        <!-- 重置歸零 按鈕 -->
+        <button id="resetBtn" class="clay-btn bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200/70 rounded-2xl py-3 px-2 flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-1.5 font-bold text-sm">
+          <span class="text-base">🔄</span>
+          <span class="font-['Kablammo'] text-base tracking-wider">RESET</span>
+        </button>
+      </div>
+
+    </div>
+
+    <!-- Lap History / 生長記錄種子庫 -->
+    <div class="w-full mt-4 clay-card rounded-2xl p-4 border border-white/60">
+      <div class="flex items-center justify-between border-b border-emerald-100/80 pb-2 mb-2 text-xs font-bold text-emerald-800">
+        <span class="flex items-center gap-1.5">
+          <span>🌸</span>
+          <span>計次花苗記錄</span>
+          <span id="lapCountBadge" class="bg-emerald-100 text-emerald-800 text-[10px] px-2 py-0.2 rounded-full">0 筆</span>
+        </span>
+        <button id="clearLapsBtn" class="text-[11px] text-emerald-600 hover:text-emerald-800 transition hidden">清空記錄</button>
+      </div>
+
+      <div id="lapList" class="max-h-36 overflow-y-auto space-y-1.5 pr-1 text-xs">
+        <div id="emptyLapHint" class="text-center py-4 text-emerald-800/40 font-medium">
+          按下「START」後點選「LAP」記錄里程碑 🌱
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Interactive Footer info -->
+  <footer class="relative z-10 text-center py-2 text-xs font-semibold text-emerald-800/60">
+    溫馨微風 • 圓形進度環與生長動畫隨時間綻放
+  </footer>
+
+  <!-- Application Logic -->
+  <script>
+    /* ==========================================================
+       Pikmin Stopwatch State & Logic
+       ========================================================== */
+    let isRunning = false;
+    let startTime = 0;
+    let elapsedTime = 0;
+    let animationFrameId = null;
+    let laps = [];
+    let lastLapTime = 0;
+
+    // DOM Elements
+    const displayMinutes = document.getElementById('displayMinutes');
+    const displaySeconds = document.getElementById('displaySeconds');
+    const displayMillis = document.getElementById('displayMillis');
+    const hourTag = document.getElementById('hourTag');
+    
+    // SVG Progress rings
+    const msCircle = document.getElementById('msCircle');
+    const secondsCircle = document.getElementById('secondsCircle');
+    const minutesCircle = document.getElementById('minutesCircle');
+    const pointerOrbit = document.getElementById('pointerOrbit');
+    
+    const MS_CIRCUMFERENCE = 2 * Math.PI * 106;
+    const SEC_CIRCUMFERENCE = 2 * Math.PI * 92;
+    const MIN_CIRCUMFERENCE = 2 * Math.PI * 76;
+
+    // Buttons
+    const startPauseBtn = document.getElementById('startPauseBtn');
+    const startPauseIcon = document.getElementById('startPauseIcon');
+    const startPauseText = document.getElementById('startPauseText');
+    const resetBtn = document.getElementById('resetBtn');
+    const lapBtn = document.getElementById('lapBtn');
+    const clearLapsBtn = document.getElementById('clearLapsBtn');
+    const lapList = document.getElementById('lapList');
+    const emptyLapHint = document.getElementById('emptyLapHint');
+    const lapCountBadge = document.getElementById('lapCountBadge');
+
+    // GitHub Icon constant
+    const GITHUB_ICON_SVG = `
+      <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24">
+        <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
+      </svg>
+    `;
+
+    // Pikmin Squad Elements
+    const redPikmin = document.getElementById('redPikmin');
+    const yellowPikmin = document.getElementById('yellowPikmin');
+    const bluePikmin = document.getElementById('bluePikmin');
+    const purplePikmin = document.getElementById('purplePikmin');
+    const allPikmin = [redPikmin, yellowPikmin, bluePikmin, purplePikmin];
+
+    // Pupils for dynamic tracking
+    const pupilsRed = document.querySelectorAll('.pupil-red');
+    const pupilsYellow = document.querySelectorAll('.pupil-yellow');
+    const pupilsBlue = document.querySelectorAll('.pupil-blue');
+    const pupilsPurple = document.querySelectorAll('.pupil-purple');
+
+    // Emote messages on click
+    const pikminEmotes = {
+      red: ['加油！👀', '盯緊秒針！🔥', '我嗅到衝刺！', '衝呀！✨'],
+      yellow: ['滴答！✨', '好刺激唷！⚡', '耳朵都在晃~', '跳起來！🌸'],
+      blue: ['哇！好快~🌊', '咕嚕咕嚕！', '時間像水流！', '太厲害了！💖'],
+      purple: ['穩住！💪', '沈著有力！', '看我的重量！', '繼續堅持！🍃']
+    };
+
+    function triggerEmote(elementId, textArray) {
+      const emoteEl = document.getElementById(elementId);
+      if (!emoteEl) return;
+      const randomText = textArray[Math.floor(Math.random() * textArray.length)];
+      emoteEl.textContent = randomText;
+      emoteEl.classList.add('show');
+      setTimeout(() => emoteEl.classList.remove('show'), 1600);
+    }
+
+    function setupPikminInteractions() {
+      redPikmin.addEventListener('click', () => {
+        redPikmin.classList.add('pikmin-pop');
+        setTimeout(() => redPikmin.classList.remove('pikmin-pop'), 400);
+        triggerEmote('redEmote', pikminEmotes.red);
+        createPetalBurst(redPikmin.getBoundingClientRect().left + 30, redPikmin.getBoundingClientRect().top + 30);
+      });
+
+      yellowPikmin.addEventListener('click', () => {
+        yellowPikmin.classList.add('pikmin-pop');
+        setTimeout(() => yellowPikmin.classList.remove('pikmin-pop'), 400);
+        triggerEmote('yellowEmote', pikminEmotes.yellow);
+        createPetalBurst(yellowPikmin.getBoundingClientRect().left + 30, yellowPikmin.getBoundingClientRect().top + 30);
+      });
+
+      bluePikmin.addEventListener('click', () => {
+        bluePikmin.classList.add('pikmin-pop');
+        setTimeout(() => bluePikmin.classList.remove('pikmin-pop'), 400);
+        triggerEmote('blueEmote', pikminEmotes.blue);
+        createPetalBurst(bluePikmin.getBoundingClientRect().left + 30, bluePikmin.getBoundingClientRect().top + 30);
+      });
+
+      purplePikmin.addEventListener('click', () => {
+        purplePikmin.classList.add('pikmin-pop');
+        setTimeout(() => purplePikmin.classList.remove('pikmin-pop'), 400);
+        triggerEmote('purpleEmote', pikminEmotes.purple);
+        createPetalBurst(purplePikmin.getBoundingClientRect().left + 30, purplePikmin.getBoundingClientRect().top + 30);
+      });
+    }
+    setupPikminInteractions();
+
+    function setPikminSquadState(state) {
+      allPikmin.forEach(p => {
+        p.classList.remove('pikmin-running-bounce', 'pikmin-running-cheer', 'pikmin-paused-tilt');
+      });
+
+      if (state === 'running') {
+        redPikmin.classList.add('pikmin-running-bounce');
+        yellowPikmin.classList.add('pikmin-running-cheer');
+        bluePikmin.classList.add('pikmin-running-bounce');
+        purplePikmin.classList.add('pikmin-running-cheer');
+      } else if (state === 'paused') {
+        redPikmin.classList.add('pikmin-paused-tilt');
+        yellowPikmin.classList.add('pikmin-paused-tilt');
+        bluePikmin.classList.add('pikmin-paused-tilt');
+        purplePikmin.classList.add('pikmin-paused-tilt');
+      } else if (state === 'reset') {
+        allPikmin.forEach(p => {
+          p.classList.add('pikmin-pop');
+          setTimeout(() => p.classList.remove('pikmin-pop'), 450);
+        });
+      }
+    }
+
+    // Sprout & Flower Stages
+    const sproutContainer = document.getElementById('sproutContainer');
+    const flowerHead = document.getElementById('flowerHead');
+    const stageIcon = document.getElementById('stageIcon');
+    const stageName = document.getElementById('stageName');
+    const pikminHeadBulb = document.getElementById('pikminHeadBulb');
+
+    // Pikmin theme bulb colors
+    const pikminColors = ['#FF4A4A', '#2B87FF', '#FFCA28', '#FFFFFF', '#9C27B0'];
+    let currentColorIdx = 0;
+
+    /* Plant Flower Growth Stages */
+    const stages = [
+      { maxSec: 10, icon: '🌱', name: '嫩葉萌芽', flowerType: 'leaf' },
+      { maxSec: 30, icon: '🌿', name: '雙葉期', flowerType: 'doubleLeaf' },
+      { maxSec: 60, icon: '🌼', name: '含苞待放', flowerType: 'bud' },
+      { maxSec: 180, icon: '🌸', name: '花開錦簇', flowerType: 'flower' },
+      { maxSec: Infinity, icon: '✨', name: '奇蹟綻放', flowerType: 'superFlower' }
+    ];
+
+    function updateFlowerStage(totalSeconds) {
+      const currentStage = stages.find(s => totalSeconds < s.maxSec) || stages[stages.length - 1];
+      stageIcon.textContent = currentStage.icon;
+      stageName.textContent = currentStage.name;
+
+      if (currentStage.flowerType === 'leaf') {
+        flowerHead.innerHTML = `
+          <path d="M50,38 C30,26 24,2 50,2 C76,2 70,26 50,38 Z" fill="#7AC943" stroke="#3B7718" stroke-width="2.5"/>
+          <path d="M50,36 Q50,18 50,6" stroke="#A3E635" stroke-width="2" stroke-linecap="round" fill="none"/>
+          <path d="M50,24 Q42,18 38,15" stroke="#A3E635" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+          <path d="M50,20 Q58,16 62,13" stroke="#A3E635" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+          <circle cx="50" cy="8" r="3.5" fill="#D9F99D" />
+        `;
+      } else if (currentStage.flowerType === 'doubleLeaf') {
+        flowerHead.innerHTML = `
+          <g transform="translate(0,-4)">
+            <path d="M50,40 C22,35 12,12 36,6 C48,8 49,30 50,40 Z" fill="#7AC943" stroke="#3B7718" stroke-width="2.2"/>
+            <path d="M50,40 C78,35 88,12 64,6 C52,8 51,30 50,40 Z" fill="#8CE04C" stroke="#3B7718" stroke-width="2.2"/>
+            <circle cx="36" cy="10" r="2.5" fill="#D9F99D"/>
+            <circle cx="64" cy="10" r="2.5" fill="#D9F99D"/>
+          </g>
+        `;
+      } else if (currentStage.flowerType === 'bud') {
+        flowerHead.innerHTML = `
+          <g transform="translate(0,-2)">
+            <path d="M50,40 C32,28 28,8 50,4 C72,8 68,28 50,40 Z" fill="#FACC15" stroke="#CA8A04" stroke-width="2.5"/>
+            <ellipse cx="50" cy="16" rx="8" ry="12" fill="#FEF08A"/>
+            <path d="M42,28 Q50,36 58,28" stroke="#CA8A04" stroke-width="2" fill="none"/>
+          </g>
+        `;
+      } else if (currentStage.flowerType === 'flower') {
+        flowerHead.innerHTML = `
+          <g transform="translate(0,-6)">
+            <circle cx="50" cy="6" r="10.5" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1.5"/>
+            <circle cx="36" cy="18" r="10.5" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1.5"/>
+            <circle cx="64" cy="18" r="10.5" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1.5"/>
+            <circle cx="41" cy="34" r="10.5" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1.5"/>
+            <circle cx="59" cy="34" r="10.5" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1.5"/>
+            <circle cx="50" cy="22" r="8" fill="#F59E0B" stroke="#D97706" stroke-width="1"/>
+            <circle cx="48" cy="20" r="2" fill="#FEF3C7"/>
+          </g>
+        `;
+      } else {
+        flowerHead.innerHTML = `
+          <g transform="translate(0,-8)">
+            <circle cx="50" cy="4" r="12" fill="#F472B6" stroke="#DB2777" stroke-width="1.5"/>
+            <circle cx="34" cy="16" r="12" fill="#F472B6" stroke="#DB2777" stroke-width="1.5"/>
+            <circle cx="66" cy="16" r="12" fill="#F472B6" stroke="#DB2777" stroke-width="1.5"/>
+            <circle cx="40" cy="36" r="12" fill="#F472B6" stroke="#DB2777" stroke-width="1.5"/>
+            <circle cx="60" cy="36" r="12" fill="#F472B6" stroke="#DB2777" stroke-width="1.5"/>
+            <circle cx="50" cy="21" r="9.5" fill="#FDE047" stroke="#EAB308" stroke-width="1.5"/>
+            <circle cx="48" cy="19" r="2.5" fill="#FFFFFF"/>
+          </g>
+        `;
+      }
+    }
+
+    // Toggle Pikmin color on head click
+    sproutContainer.addEventListener('click', () => {
+      currentColorIdx = (currentColorIdx + 1) % pikminColors.length;
+      pikminHeadBulb.setAttribute('fill', pikminColors[currentColorIdx]);
+      createPetalBurst(window.innerWidth / 2, window.innerHeight * 0.38);
+    });
+
+    /* ==========================================================
+       Stopwatch Engine with High-Precision Delta
+       ========================================================== */
+    function formatTime(ms) {
+      const hours = Math.floor(ms / 3600000);
+      const minutes = Math.floor((ms % 3600000) / 60000);
+      const seconds = Math.floor((ms % 60000) / 1000);
+      const millis = Math.floor((ms % 1000) / 10);
+
+      return {
+        hours: String(hours).padStart(2, '0'),
+        minutes: String(minutes).padStart(2, '0'),
+        seconds: String(seconds).padStart(2, '0'),
+        millis: String(millis).padStart(2, '0'),
+        rawHours: hours,
+        rawMinutes: minutes,
+        rawSeconds: seconds,
+        rawMillis: millis
+      };
+    }
+
+    function renderTime() {
+      const now = performance.now();
+      const currentMs = elapsedTime + (isRunning ? (now - startTime) : 0);
+      const t = formatTime(currentMs);
+
+      displayMinutes.textContent = t.minutes;
+      displaySeconds.textContent = t.seconds;
+      displayMillis.textContent = t.millis;
+
+      if (t.rawHours > 0) {
+        hourTag.textContent = `${t.hours} 小時`;
+        hourTag.classList.remove('hidden');
+      } else {
+        hourTag.classList.add('hidden');
+      }
+
+      const msFraction = (currentMs % 1000) / 1000;
+      msCircle.style.strokeDashoffset = MS_CIRCUMFERENCE * (1 - msFraction);
+
+      const secFraction = ((currentMs % 60000) / 60000);
+      secondsCircle.style.strokeDashoffset = SEC_CIRCUMFERENCE * (1 - secFraction);
+
+      const minFraction = ((currentMs % 3600000) / 3600000);
+      minutesCircle.style.strokeDashoffset = MIN_CIRCUMFERENCE * (1 - minFraction);
+
+      const degrees = (secFraction * 360);
+      pointerOrbit.style.transform = `rotate(${degrees}deg)`;
+
+      const rad = (degrees * Math.PI) / 180;
+      const eyeOffsetX = Math.cos(rad) * 1.5;
+      const eyeOffsetY = Math.sin(rad) * 1.5;
+      pupilsRed.forEach(p => p.setAttribute('transform', `translate(${eyeOffsetX}, ${eyeOffsetY})`));
+      pupilsYellow.forEach(p => p.setAttribute('transform', `translate(${eyeOffsetX}, ${eyeOffsetY})`));
+      pupilsBlue.forEach(p => p.setAttribute('transform', `translate(${eyeOffsetX}, ${eyeOffsetY * 0.7})`));
+      pupilsPurple.forEach(p => p.setAttribute('transform', `translate(${eyeOffsetX}, ${eyeOffsetY * 0.7})`));
+
+      updateFlowerStage(Math.floor(currentMs / 1000));
+
+      if (isRunning) {
+        animationFrameId = requestAnimationFrame(renderTime);
+      }
+    }
+
+    function startTimer() {
+      if (isRunning) return;
+      isRunning = true;
+      startTime = performance.now();
+      
+      // Update Button Appearance (Switch to PAUSE)
+      startPauseBtn.className = "clay-btn bg-gradient-to-b from-[#FFA000] to-[#E65100] hover:from-[#FFB300] hover:to-[#EF6C00] text-white border-2 border-amber-300 rounded-2xl py-3 px-2 flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-1.5 font-black text-base shadow-lg shadow-amber-600/30";
+      startPauseIcon.textContent = "❚❚";
+      startPauseText.textContent = "PAUSE";
+      lapBtn.disabled = false;
+
+      sproutContainer.classList.remove('animate-sway');
+      sproutContainer.classList.add('animate-sway-fast');
+
+      setPikminSquadState('running');
+      triggerEmote('redEmote', ['全力加速！']);
+      triggerEmote('yellowEmote', ['跑起來！⚡']);
+
+      animationFrameId = requestAnimationFrame(renderTime);
+    }
+
+    function pauseTimer() {
+      if (!isRunning) return;
+      isRunning = false;
+      elapsedTime += performance.now() - startTime;
+      cancelAnimationFrame(animationFrameId);
+
+      // Update Button Appearance (Switch to RESUME)
+      startPauseBtn.className = "clay-btn bg-gradient-to-b from-[#8DE347] to-[#59A82D] hover:from-[#96EB4F] hover:to-[#60B531] text-white border-2 border-emerald-300 rounded-2xl py-3 px-2 flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-1.5 font-black text-base shadow-lg shadow-emerald-600/30";
+      startPauseIcon.innerHTML = GITHUB_ICON_SVG;
+      startPauseText.textContent = "RESUME";
+
+      sproutContainer.classList.remove('animate-sway-fast');
+      sproutContainer.classList.add('animate-sway');
+
+      setPikminSquadState('paused');
+      triggerEmote('blueEmote', ['暫停了嗎？🤔']);
+      triggerEmote('purpleEmote', ['喘口氣~🍃']);
+    }
+
+    function resetTimer() {
+      if (isRunning) {
+        isRunning = false;
+        cancelAnimationFrame(animationFrameId);
+      }
+
+      elapsedTime = 0;
+      startTime = 0;
+      lastLapTime = 0;
+
+      // Reset Button Texts & Icon
+      startPauseBtn.className = "clay-btn bg-gradient-to-b from-[#8DE347] to-[#59A82D] hover:from-[#96EB4F] hover:to-[#60B531] text-white border-2 border-emerald-300 rounded-2xl py-3 px-2 flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-1.5 font-black text-base shadow-lg shadow-emerald-600/30";
+      startPauseIcon.innerHTML = GITHUB_ICON_SVG;
+      startPauseText.textContent = "START";
+      lapBtn.disabled = true;
+
+      displayMinutes.textContent = "00";
+      displaySeconds.textContent = "00";
+      displayMillis.textContent = "00";
+      hourTag.classList.add('hidden');
+
+      msCircle.style.strokeDashoffset = MS_CIRCUMFERENCE;
+      secondsCircle.style.strokeDashoffset = SEC_CIRCUMFERENCE;
+      minutesCircle.style.strokeDashoffset = MIN_CIRCUMFERENCE;
+      pointerOrbit.style.transform = `rotate(0deg)`;
+
+      sproutContainer.classList.remove('animate-sway-fast');
+      sproutContainer.classList.add('animate-sway');
+      updateFlowerStage(0);
+
+      setPikminSquadState('reset');
+      triggerEmote('redEmote', ['重置完畢！🌱']);
+      triggerEmote('yellowEmote', ['準備好啦！✨']);
+
+      laps = [];
+      renderLaps();
+
+      createPetalBurst(window.innerWidth / 2, window.innerHeight * 0.5);
+    }
+
+    function recordLap() {
+      if (!isRunning && elapsedTime === 0) return;
+      const currentMs = elapsedTime + (isRunning ? (performance.now() - startTime) : 0);
+      const splitMs = currentMs - lastLapTime;
+      lastLapTime = currentMs;
+
+      const lapNumber = laps.length + 1;
+      laps.unshift({
+        num: lapNumber,
+        total: currentMs,
+        split: splitMs
+      });
+
+      renderLaps();
+      createPetalBurst(window.innerWidth / 2, window.innerHeight * 0.7);
+    }
+
+    function renderLaps() {
+      if (laps.length === 0) {
+        emptyLapHint.classList.remove('hidden');
+        clearLapsBtn.classList.add('hidden');
+        lapCountBadge.textContent = "0 筆";
+        lapList.innerHTML = '';
+        lapList.appendChild(emptyLapHint);
+        return;
+      }
+
+      emptyLapHint.classList.add('hidden');
+      clearLapsBtn.classList.remove('hidden');
+      lapCountBadge.textContent = `${laps.length} 筆`;
+      
+      let html = '';
+      laps.forEach(lap => {
+        const total = formatTime(lap.total);
+        const split = formatTime(lap.split);
+        html += `
+          <div class="flex items-center justify-between bg-white/90 px-3 py-2 rounded-xl border border-emerald-100 shadow-sm animate-fade-in">
+            <div class="flex items-center gap-2">
+              <span class="w-6 h-6 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold text-[10px]">#${lap.num}</span>
+              <span class="font-medium text-emerald-900 text-xs">分段 +${split.minutes}:${split.seconds}.${split.millis}</span>
+            </div>
+            <div class="font-mono font-bold text-emerald-800 text-xs">
+              ${total.minutes}:${total.seconds}.${total.millis}
+            </div>
+          </div>
+        `;
+      });
+      lapList.innerHTML = html;
+    }
+
+    /* Event Listeners */
+    startPauseBtn.addEventListener('click', () => {
+      if (isRunning) {
+        pauseTimer();
+      } else {
+        startTimer();
+      }
+    });
+
+    resetBtn.addEventListener('click', resetTimer);
+    lapBtn.addEventListener('click', recordLap);
+    clearLapsBtn.addEventListener('click', () => {
+      laps = [];
+      lastLapTime = elapsedTime + (isRunning ? (performance.now() - startTime) : 0);
+      renderLaps();
+    });
+
+    /* ==========================================================
+       Ambient Nature Particles (Canvas Canvas Animation)
+       ========================================================== */
+    const canvas = document.getElementById('ambientCanvas');
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+    let burstParticles = [];
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    class NatureMote {
+      constructor() {
+        this.reset();
+      }
+      reset() {
+        this.x = Math.random() * canvas.width;
+        this.y = Math.random() * canvas.height;
+        this.size = Math.random() * 4 + 2;
+        this.speedX = (Math.random() - 0.4) * 0.8;
+        this.speedY = Math.random() * 0.6 + 0.3;
+        this.opacity = Math.random() * 0.5 + 0.2;
+        this.type = Math.random() > 0.4 ? 'pollen' : 'leaf';
+        this.angle = Math.random() * Math.PI * 2;
+        this.rotSpeed = (Math.random() - 0.5) * 0.04;
+      }
+      update() {
+        this.x += this.speedX + Math.sin(this.angle) * 0.5;
+        this.y += this.speedY;
+        this.angle += this.rotSpeed;
+
+        if (this.y > canvas.height + 20 || this.x < -20 || this.x > canvas.width + 20) {
+          this.reset();
+          this.y = -10;
+        }
+      }
+      draw() {
+        ctx.save();
+        ctx.translate(this.x, this.y);
+        ctx.rotate(this.angle);
+        ctx.globalAlpha = this.opacity;
+
+        if (this.type === 'pollen') {
+          ctx.beginPath();
+          ctx.arc(0, 0, this.size, 0, Math.PI * 2);
+          ctx.fillStyle = '#FFE066';
+          ctx.shadowColor = '#FFCA28';
+          ctx.shadowBlur = 6;
+          ctx.fill();
+        } else {
+          ctx.beginPath();
+          ctx.ellipse(0, 0, this.size * 1.6, this.size * 0.8, 0, 0, Math.PI * 2);
+          ctx.fillStyle = '#9BD871';
+          ctx.fill();
+        }
+        ctx.restore();
+      }
+    }
+
+    class BurstPetal {
+      constructor(x, y) {
+        this.x = x;
+        this.y = y;
+        const angle = Math.random() * Math.PI * 2;
+        const speed = Math.random() * 6 + 2;
+        this.vx = Math.cos(angle) * speed;
+        this.vy = Math.sin(angle) * speed;
+        this.size = Math.random() * 6 + 4;
+        this.life = 1;
+        this.decay = Math.random() * 0.03 + 0.02;
+        this.color = ['#FF4A4A', '#7AC943', '#FFCA28', '#FFFFFF', '#FF80AB'][Math.floor(Math.random() * 5)];
+        this.rotation = Math.random() * 6;
+      }
+      update() {
+        this.x += this.vx;
+        this.y += this.vy;
+        this.vy += 0.12;
+        this.rotation += 0.1;
+        this.life -= this.decay;
+      }
+      draw() {
+        if (this.life <= 0) return;
+        ctx.save();
+        ctx.translate(this.x, this.y);
+        ctx.rotate(this.rotation);
+        ctx.globalAlpha = Math.max(0, this.life);
+        ctx.beginPath();
+        ctx.ellipse(0, 0, this.size, this.size * 0.6, 0, 0, Math.PI * 2);
+        ctx.fillStyle = this.color;
+        ctx.fill();
+        ctx.restore();
+      }
+    }
+
+    function createPetalBurst(x, y) {
+      for (let i = 0; i < 18; i++) {
+        burstParticles.push(new BurstPetal(x, y));
+      }
+    }
+
+    for (let i = 0; i < 28; i++) {
+      particles.push(new NatureMote());
+    }
+
+    function renderAmbient() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      particles.forEach(p => {
+        p.update();
+        p.draw();
+      });
+
+      for (let i = burstParticles.length - 1; i >= 0; i--) {
+        const bp = burstParticles[i];
+        bp.update();
+        bp.draw();
+        if (bp.life <= 0) {
+          burstParticles.splice(i, 1);
+        }
+      }
+
+      requestAnimationFrame(renderAmbient);
+    }
+    renderAmbient();
+
+    /* ==========================================================
+       Custom User Image Clarity & High-Res Engine
+       ========================================================== */
+    const customUserImg = document.getElementById('customUserImg');
+    const polaroidImg = document.getElementById('polaroidImg');
+    const polaroidContainer = document.getElementById('polaroidContainer');
+    const dialImageWrapper = document.getElementById('dialImageWrapper');
+    const dialImgMask = document.getElementById('dialImgMask');
+    const customImageInput = document.getElementById('customImageInput');
+    const clarityStatusHint = document.getElementById('clarityStatusHint');
+
+    const btnModePolaroid = document.getElementById('btnModePolaroid');
+    const btnModeDial = document.getElementById('btnModeDial');
+    const btnModeBg = document.getElementById('btnModeBg');
+    const btnToggleTrans = document.getElementById('btnToggleTrans');
+
+    let currentClarityMode = 'dial';
+    let isSolidColor = false;
+
+    function handleImageLoadError(imgEl) {
+      imgEl.onerror = () => {
+        imgEl.src = 'https://placehold.co/400x400/84cc16/ffffff?text=清晰原圖預備+(點選上傳)';
+      };
+    }
+    handleImageLoadError(customUserImg);
+    handleImageLoadError(polaroidImg);
+
+    function updateClarityMode(mode) {
+      currentClarityMode = mode;
+      
+      [btnModePolaroid, btnModeDial, btnModeBg].forEach(b => {
+        b.className = "py-1 px-2 rounded-lg border border-emerald-300 bg-white text-emerald-800 shadow-sm transition hover:bg-emerald-50";
+      });
+
+      if (mode === 'polaroid') {
+        btnModePolaroid.className = "py-1 px-2 rounded-lg border border-emerald-400 bg-emerald-700 text-white shadow-sm font-black";
+        polaroidContainer.classList.remove('hidden');
+        dialImageWrapper.classList.add('hidden');
+        clarityStatusHint.textContent = "✨ 模式：獨立拍立得相框（100% 原圖不遮擋，完全零模糊）";
+      } else if (mode === 'dial') {
+        btnModeDial.className = "py-1 px-2 rounded-lg border border-emerald-400 bg-emerald-700 text-white shadow-sm font-black";
+        polaroidContainer.classList.add('hidden');
+        dialImageWrapper.classList.remove('hidden');
+        dialImageWrapper.className = "absolute w-44 h-44 sm:w-48 sm:h-48 rounded-full overflow-hidden flex items-center justify-center transition-all duration-300 pointer-events-none border-2 border-emerald-400/80 shadow-md";
+        applyMaskLevel();
+        clarityStatusHint.textContent = "✨ 模式：圓形錶盤核心（銳利原圖，搭配浮雕清晰數字卡）";
+      } else if (mode === 'bg') {
+        btnModeBg.className = "py-1 px-2 rounded-lg border border-emerald-400 bg-emerald-700 text-white shadow-sm font-black";
+        polaroidContainer.classList.add('hidden');
+        dialImageWrapper.classList.remove('hidden');
+        dialImageWrapper.className = "absolute inset-2 rounded-3xl overflow-hidden flex items-center justify-center transition-all duration-300 pointer-events-none border border-emerald-300/40";
+        applyMaskLevel();
+        clarityStatusHint.textContent = "✨ 模式：全卡片清晰底圖展示";
+      }
+    }
+
+    function applyMaskLevel() {
+      if (isSolidColor) {
+        dialImgMask.className = "absolute inset-0 bg-transparent";
+        customUserImg.style.opacity = "1";
+        btnToggleTrans.textContent = "切換為護眼對比層";
+      } else {
+        dialImgMask.className = "absolute inset-0 bg-white/35";
+        customUserImg.style.opacity = "0.95";
+        btnToggleTrans.textContent = "切換為100%原始色彩";
+      }
+    }
+
+    btnModePolaroid.addEventListener('click', () => updateClarityMode('polaroid'));
+    btnModeDial.addEventListener('click', () => updateClarityMode('dial'));
+    btnModeBg.addEventListener('click', () => updateClarityMode('bg'));
+
+    btnToggleTrans.addEventListener('click', () => {
+      isSolidColor = !isSolidColor;
+      applyMaskLevel();
+      triggerEmote('redEmote', [isSolidColor ? '100%原色！' : '清晰保護色！']);
+    });
+
+    customImageInput.addEventListener('change', (e) => {
+      const file = e.target.files && e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          const directDataUrl = event.target.result;
+          customUserImg.src = directDataUrl;
+          polaroidImg.src = directDataUrl;
+          createPetalBurst(window.innerWidth / 2, window.innerHeight * 0.45);
+          triggerEmote('yellowEmote', ['原圖無損載入成功！✨']);
+          clarityStatusHint.textContent = `✨ 已載入本機高解析原圖 (${file.name})`;
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    // Initial render
+    renderTime();
+  </script>
+</body>
+</html>
